@@ -1,0 +1,115 @@
+from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, pipeline
+from sentence_transformers import SentenceTransformer, SimilarityFunction
+import numpy as np
+import faiss
+import pickle
+import os
+from utils import preprocess_docx
+import nltk
+nltk.download('punkt_tab')
+from nltk.tokenize import sent_tokenize
+import docx
+import logging
+from dotenv import load_dotenv
+
+# Remove warnings and set logging level
+logging.getLogger("transformers").setLevel(logging.ERROR)
+logging.getLogger("faiss").setLevel(logging.ERROR)
+logging.getLogger("nltk").setLevel(logging.ERROR)
+
+
+load_dotenv()
+
+model_for_sequence_classification = os.getenv("SEQ_MODEL")
+model_for_sentence_embedding = os.getenv("SENTENCE_EMBEDDING_MODEL")
+qa_model = os.getenv("QA_MODEL")
+
+
+def load_models():
+    try:
+        
+        # Load DistilBERT tokenizer and model for sequence classification
+        distilbert_tokenizer = DistilBertTokenizer.from_pretrained(model_for_sequence_classification)
+        distilbert_model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=2)
+
+        # Load SentenceTransformer model for generating sentence embeddings
+        sentence_transformer_model = SentenceTransformer(model_for_sentence_embedding)
+
+        return distilbert_tokenizer, distilbert_model, sentence_transformer_model
+    except Exception as e:
+        print(f"Error loading models: {e}")
+        return None, None, None
+    
+
+def chunk_text(text, max_chunk=100):
+    try:
+        sentences = sent_tokenize(text)
+        chunk, current_chunk, word_count = [], [], 0
+        for sentence in sentences:
+            words = sentence.split()
+            if word_count + len(words) > max_chunk:
+                chunk.append(" ".join(current_chunk))
+                current_chunk, word_count = [], 0
+            current_chunk.append(sentence)
+            word_count += len(words)
+        
+        if current_chunk:
+            chunk.append(" ".join(current_chunk))
+        
+        return chunk
+    except Exception as e:
+        print(f"Error chunking text: {e}")
+        return []
+
+
+def generate_embedding(text, model):
+    try:
+        embedding = model.encode(text)
+        return embedding
+    except Exception as e:
+        print(f"Error generating embedding: {e}")
+        return None  
+
+
+def qa_model_initializer(context: str, query: str):
+    try:
+        prompt = f"Context: {context}\n\nQuestion: {query}\n\nAnswer:"
+        qa_model_obj = pipeline("text2text-generation", model=qa_model)
+        result = qa_model_obj(prompt, max_length=128, temperature=0)
+        return result[0]["generated_text"]
+    except:
+        print("Sorry! I don't exactly know the answer to that :(")
+
+
+def get_answer(user_query: str, chunks: list[str], filename: str):
+    doc_chunks = []
+    distilbert_tokenizer, distilbert_model, sentence_transformer_model = load_models()
+    if distilbert_tokenizer and distilbert_model and sentence_transformer_model:
+        if chunks:
+            for chunk in chunks:
+                doc_chunks.append({"doc": filename, "text": chunk})
+
+            chunks_hybrid = [chunk["text"]['text'] for chunk in doc_chunks]
+
+            embedding = generate_embedding(chunks_hybrid, sentence_transformer_model)
+
+            if embedding is not None:
+                # Create FAISS index
+                index = faiss.IndexFlatL2(embedding.shape[1])
+                index.add(np.array(embedding))
+
+                q_emb = sentence_transformer_model.encode([user_query])
+                D, I = index.search(q_emb, k=2)
+                for idx in I[0]:
+                    response = "".join(chunks_hybrid[idx])
+                    final_output = qa_model_initializer(context=response, query=user_query)
+                    return final_output
+            else:
+                return f"Apologies! It appears as if something went wrong while trying to generate embedding"
+        else:
+            return "Apologies! It appears as if something went wrong while processing the document."
+    else:
+        return "Apologies! It appears as if something went wrong while loading the models."
+    
+
+# get_answer("What is the purpose of the document?")

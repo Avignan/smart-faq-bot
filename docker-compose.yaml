@@ -1,0 +1,41 @@
+
+services:
+  frontend:
+    build:
+      context: ./project
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=http://localhost:8000
+    container_name: rag_frontend
+    ports:
+      - "3000:80"
+    env_file:
+      - .env
+    depends_on:
+      - backend
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rag_backend
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+    environment:
+      - MONGODB_URI=mongodb+srv://avignan:aZdpJrdbZt6djqZE@mycluster1.knotkig.mongodb.net/FAQ_RAG?retryWrites=true&w=majority&appName=MyCluster1/FAQ_RAG
+
+  mongo:
+    image: mongo:6.0
+    container_name: rag_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
