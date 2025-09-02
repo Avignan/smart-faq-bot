@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Upload, X, FileText, CheckCircle } from 'lucide-react';
+import { X, FileText, CheckCircle } from 'lucide-react';
 import { uploadDocument } from '../services/api';
 
 interface DocumentUploadProps {
@@ -13,27 +13,7 @@ const DocumentUpload = ({ isOpen, onClose, onUploadSuccess }: DocumentUploadProp
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFile(e.dataTransfer.files[0]);
-    }
-  }, []);
-
-  const handleFile = async (file: File) => {
+  const handleFile = useCallback(async (file: File) => {
     if (!file.name.endsWith('.docx') && !file.name.endsWith('.pdf')) {
       setUploadStatus('error');
       return;
@@ -61,7 +41,27 @@ const DocumentUpload = ({ isOpen, onClose, onUploadSuccess }: DocumentUploadProp
     } finally {
       setUploading(false);
     }
-  };
+  }, [onUploadSuccess, onClose]);
+
+  const handleDrag = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  }, [handleFile]);
 
   if (!isOpen) return null;
 
