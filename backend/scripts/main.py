@@ -34,7 +34,8 @@ app.add_middleware(
 def health_check():
     return {"status": "ok"}
 
-handler = Mangum(app)
+# Lambda handler
+lambda_handler = Mangum(app)
 
 
 class Query(BaseModel):
