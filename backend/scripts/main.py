@@ -64,6 +64,9 @@ def ask_question(query: Query):
         else:
             raise HTTPException(status_code=404, detail="Failed to retrieve answer.")
     except Exception as e:
+        print(f"Error in ask_question: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
     
 
