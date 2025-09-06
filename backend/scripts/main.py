@@ -49,8 +49,6 @@ def ask_question(query: Query):
         if db_con is None:
             raise HTTPException(status_code=500, detail="Failed to connect to database.")
             
-        logging.info(f"Received query: {query}")
-        
         # Get most recently uploaded document (fallback to _id if no uploaded_at)
         latest_doc = db_con.find_one({}, {"filename": 1}, sort=[("_id", -1)])
         if not latest_doc:
@@ -60,9 +58,10 @@ def ask_question(query: Query):
         
         # Get all chunks for this document
         chunks = list(db_con.find({"filename": doc_name}, {"text": 1}).sort("chunk_id", 1))
-        
+        logging.info(f"Document name: {doc_name}, Chunks: {len(chunks)}")
         try:
             answer = get_answer(query.query, chunks, doc_name)
+            logging.info(f"Answer: {answer}")
         except Exception as e:
             logging.error(f"Error generating answer: {str(e)}")
             answer = ""
