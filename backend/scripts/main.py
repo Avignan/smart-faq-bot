@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from pathlib import Path
 from mangum import Mangum
 from .rag_engine import get_answer, chunk_text
-from utils import db_connection, preprocess_docx, extract_text_from_docx
+from .utils import db_connection, preprocess_docx, extract_text_from_docx
 import os
 import uuid
 from dotenv import load_dotenv
