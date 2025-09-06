@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
+import logging
 from .rag_engine import get_answer, chunk_text
 from .utils import db_connection, preprocess_docx, extract_text_from_docx
 import os
@@ -11,6 +12,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 mongodb_URI = os.getenv("MONGODB_URI")
+
+# configure logger
+logging.basicConfig(level=logging.INFO)
 
 
 app = FastAPI(title='Gen AI RAG API', version='1.0.0')
@@ -41,6 +45,7 @@ class Query(BaseModel):
 def ask_question(query: Query):
     answer = ""
     try:
+        logging.info(f"Received query: {query}")
         db_con = db_connection(mongodb_URI)
         if db_con is None:
             raise HTTPException(status_code=500, detail="Failed to connect to database.")
