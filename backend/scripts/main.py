@@ -61,9 +61,11 @@ def ask_question(query: Query):
         # Get all chunks for this document
         chunks = list(db_con.find({"filename": doc_name}, {"text": 1}).sort("chunk_id", 1))
         
-        logging.info(f"Document name: {doc_name}, Chunks: {len(chunks)}")
-        answer = get_answer(query.query, chunks, doc_name)
-        logging.info(f"Generated answer: {answer}")
+        try:
+            answer = get_answer(query.query, chunks, doc_name)
+        except Exception as e:
+            logging.error(f"Error generating answer: {str(e)}")
+            answer = ""
         if answer:
             return {"answer": answer}
         else:
