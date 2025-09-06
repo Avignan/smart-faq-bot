@@ -83,7 +83,9 @@ def qa_model_initializer(context: str, query: str):
 
 def get_answer(user_query: str, chunks: list[str], filename: str):
     doc_chunks = []
+    logging.info("Entered Get Answer Function")
     distilbert_tokenizer, distilbert_model, sentence_transformer_model = load_models()
+    logging.info(f"Models loaded: {distilbert_tokenizer is not None}, {distilbert_model is not None}, {sentence_transformer_model is not None}")
     if distilbert_tokenizer and distilbert_model and sentence_transformer_model:
         if chunks:
             for chunk in chunks:
