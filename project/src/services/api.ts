@@ -1,4 +1,4 @@
-const API_URL = "https://smart-faq-bot-71u3.onrender.com";
+const API_URL = "https://smart-faq-bot-82nn.onrender.com";
 
 interface QueryResponse {
   answer: string;
