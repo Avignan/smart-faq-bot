@@ -44,13 +44,12 @@ class Query(BaseModel):
 def ask_question(query: Query):
     answer = ""
     try:
-        logging.info(f"Received query: {query}")
         db_con = db_connection(mongodb_URI)
         logging.info(f"Database connection: {db_con is not None}")
         if db_con is None:
             raise HTTPException(status_code=500, detail="Failed to connect to database.")
             
-        print(f"Received query: {query.query}")
+        logging.info(f"Received query: {query}")
         
         # Get most recently uploaded document (fallback to _id if no uploaded_at)
         latest_doc = db_con.find_one({}, {"filename": 1}, sort=[("_id", -1)])
@@ -62,8 +61,9 @@ def ask_question(query: Query):
         # Get all chunks for this document
         chunks = list(db_con.find({"filename": doc_name}, {"text": 1}).sort("chunk_id", 1))
         
-        print(f"Document name: {doc_name}, Chunks: {len(chunks)}")
+        logging.info(f"Document name: {doc_name}, Chunks: {len(chunks)}")
         answer = get_answer(query.query, chunks, doc_name)
+        logging.info(f"Generated answer: {answer}")
         if answer:
             return {"answer": answer}
         else:
