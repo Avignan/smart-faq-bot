@@ -46,6 +46,7 @@ def ask_question(query: Query):
     try:
         logging.info(f"Received query: {query}")
         db_con = db_connection(mongodb_URI)
+        logging.info(f"Database connection: {db_con is not None}")
         if db_con is None:
             raise HTTPException(status_code=500, detail="Failed to connect to database.")
             
