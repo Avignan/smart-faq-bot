@@ -4,7 +4,7 @@ import numpy as np
 import faiss
 import pickle
 import os
-from .utils import preprocess_docx
+from scripts.utils import preprocess_docx
 import nltk
 nltk.download('punkt_tab')
 from nltk.tokenize import sent_tokenize
