@@ -16,7 +16,6 @@ mongodb_URI = os.getenv("MONGODB_URI")
 # configure logger
 logging.basicConfig(level=logging.INFO)
 
-
 app = FastAPI(title='Gen AI RAG API', version='1.0.0')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
