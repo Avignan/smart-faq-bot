@@ -27,11 +27,12 @@ qa_model = os.getenv("QA_MODEL")
 
 def load_models():
     try:
-        
+        logging.info(model_for_sequence_classification)
         # Load DistilBERT tokenizer and model for sequence classification
         distilbert_tokenizer = DistilBertTokenizer.from_pretrained(model_for_sequence_classification)
         distilbert_model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=2)
-
+        logging.info("DistilBERT model loaded successfully")
+        logging.info(model_for_sentence_embedding)
         # Load SentenceTransformer model for generating sentence embeddings
         sentence_transformer_model = SentenceTransformer(model_for_sentence_embedding)
 
