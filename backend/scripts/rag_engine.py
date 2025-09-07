@@ -25,18 +25,18 @@ model_for_sentence_embedding = os.getenv("SENTENCE_EMBEDDING_MODEL")
 qa_model = os.getenv("QA_MODEL")
 
 
-def load_models():
+def load_model():
     try:
-        logging.info(model_for_sequence_classification)
+        # logging.info(model_for_sequence_classification)
         # Load DistilBERT tokenizer and model for sequence classification
-        distilbert_tokenizer = DistilBertTokenizer.from_pretrained(model_for_sequence_classification)
-        distilbert_model = DistilBertForSequenceClassification.from_pretrained(model_for_sequence_classification, num_labels=2)
+        # distilbert_tokenizer = DistilBertTokenizer.from_pretrained(model_for_sequence_classification)
+        # distilbert_model = DistilBertForSequenceClassification.from_pretrained(model_for_sequence_classification, num_labels=2)
         logging.info("DistilBERT model loaded successfully")
         logging.info(model_for_sentence_embedding)
         # Load SentenceTransformer model for generating sentence embeddings
         sentence_transformer_model = SentenceTransformer(model_for_sentence_embedding)
 
-        return distilbert_tokenizer, distilbert_model, sentence_transformer_model
+        return sentence_transformer_model
     except Exception as e:
         print(f"Error loading models: {e}")
         return None, None, None
@@ -85,9 +85,8 @@ def qa_model_initializer(context: str, query: str):
 def get_answer(user_query: str, chunks: list[str], filename: str):
     doc_chunks = []
     logging.info("Entered Get Answer Function")
-    distilbert_tokenizer, distilbert_model, sentence_transformer_model = load_models()
-    logging.info(f"Models loaded: {distilbert_tokenizer is not None}, {distilbert_model is not None}, {sentence_transformer_model is not None}")
-    if distilbert_tokenizer and distilbert_model and sentence_transformer_model:
+    sentence_transformer_model = load_model()
+    if sentence_transformer_model:
         if chunks:
             for chunk in chunks:
                 doc_chunks.append({"doc": filename, "text": chunk})
