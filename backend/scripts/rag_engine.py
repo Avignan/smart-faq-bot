@@ -35,7 +35,7 @@ def load_model():
         logging.info(model_for_sentence_embedding)
         # Load SentenceTransformer model for generating sentence embeddings
         sentence_transformer_model = SentenceTransformer(model_for_sentence_embedding)
-
+        logging.info("SentenceTransformer model loaded successfully", sentence_transformer_model)
         return sentence_transformer_model
     except Exception as e:
         print(f"Error loading models: {e}")
@@ -90,7 +90,7 @@ def get_answer(user_query: str, chunks: list[str], filename: str):
         if chunks:
             for chunk in chunks:
                 doc_chunks.append({"doc": filename, "text": chunk})
-
+            logging.info('doc_chunks', doc_chunks)
             chunks_hybrid = [chunk["text"]['text'] for chunk in doc_chunks]
 
             embedding = generate_embedding(chunks_hybrid, sentence_transformer_model)
