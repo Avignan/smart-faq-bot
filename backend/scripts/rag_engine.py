@@ -4,7 +4,6 @@ import numpy as np
 import faiss
 import pickle
 import os
-from .utils import preprocess_docx
 import nltk
 nltk.download('punkt_tab')
 from nltk.tokenize import sent_tokenize
@@ -27,20 +26,16 @@ qa_model = os.getenv("QA_MODEL")
 
 def load_model():
     try:
-        # logging.info(model_for_sequence_classification)
-        # Load DistilBERT tokenizer and model for sequence classification
-        # distilbert_tokenizer = DistilBertTokenizer.from_pretrained(model_for_sequence_classification)
-        # distilbert_model = DistilBertForSequenceClassification.from_pretrained(model_for_sequence_classification, num_labels=2)
-        logging.info("DistilBERT model loaded successfully")
-        logging.info(model_for_sentence_embedding)
-        # Load SentenceTransformer model for generating sentence embeddings
-        sentence_transformer_model = SentenceTransformer(model_for_sentence_embedding)
-        logging.info("SentenceTransformer model loaded successfully", sentence_transformer_model)
+        logging.info(f"Loading SentenceTransformer model: {model_for_sentence_embedding}")
+        sentence_transformer_model = SentenceTransformer(model_for_sentence_embedding or 'all-MiniLM-L6-v2')
+        logging.info("SentenceTransformer model loaded successfully")
         return sentence_transformer_model
     except Exception as e:
         print(f"Error loading models: {e}")
-        return None, None, None
-    
+        return None
+
+# Load model at module level (startup)
+sentence_transformer_model = load_model()
 
 def chunk_text(text, max_chunk=100):
     try:
@@ -84,14 +79,13 @@ def qa_model_initializer(context: str, query: str):
 
 def get_answer(user_query: str, chunks: list[str], filename: str):
     doc_chunks = []
-    logging.info("Entered Get Answer Function")
-    sentence_transformer_model = load_model()
+    logging.info("sentence_transformer_model", sentence_transformer_model)
     if sentence_transformer_model:
         if chunks:
             for chunk in chunks:
                 doc_chunks.append({"doc": filename, "text": chunk})
             logging.info('doc_chunks', doc_chunks)
-            chunks_hybrid = [chunk["text"]['text'] for chunk in doc_chunks]
+            chunks_hybrid = [chunk["text"] for chunk in doc_chunks]
 
             embedding = generate_embedding(chunks_hybrid, sentence_transformer_model)
 
