@@ -11,6 +11,13 @@ import docx
 import logging
 from dotenv import load_dotenv
 
+os.environ["NLTK_DATA"] = os.getenv("NLTK_DATA", "./nltk_data")
+
+# Example: Download stopwords if not already present
+nltk.download("punkt", quiet=True)
+nltk.download("stopwords", quiet=True)
+
+
 # Remove warnings and set logging level
 logging.getLogger("transformers").setLevel(logging.ERROR)
 logging.getLogger("faiss").setLevel(logging.ERROR)
