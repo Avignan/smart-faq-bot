@@ -14,8 +14,8 @@ from dotenv import load_dotenv
 os.environ["NLTK_DATA"] = os.getenv("NLTK_DATA", "./nltk_data")
 
 # Example: Download stopwords if not already present
-nltk.download("punkt", quiet=True)
-nltk.download("stopwords", quiet=True)
+nltk.download("punkt", download_dir=os.getenv("NLTK_DATA", "/app/nltk_data"), quiet=True)
+nltk.download("stopwords", download_dir=os.getenv("NLTK_DATA", "/app/nltk_data"), quiet=True)
 
 
 # Remove warnings and set logging level
