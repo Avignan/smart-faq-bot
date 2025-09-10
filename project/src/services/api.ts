@@ -1,4 +1,4 @@
-const API_URL = "https://smart-faq-bot-82nn.onrender.com";
+const API_URL = "https://avignan-smart-faq-backend.hf.space";
 
 interface QueryResponse {
   answer: string;
@@ -12,7 +12,7 @@ interface UploadResponse {
 }
 
 export async function sendQuery(question: string): Promise<QueryResponse> {
-  
+  console.log(question);
   const response = await fetch(`${API_URL}/ask`, {
     method: 'POST',
     headers: {
