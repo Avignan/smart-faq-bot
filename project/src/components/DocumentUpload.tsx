@@ -104,7 +104,7 @@ const DocumentUpload = ({ isOpen, onClose, onUploadSuccess }: DocumentUploadProp
                   />
                 </label>
               </p>
-              <p className="text-sm text-gray-500">Supports DOCX and PDF files</p>
+              <p className="text-sm text-gray-500">Supports DOCX files</p>
             </>
           )}
         </div>
